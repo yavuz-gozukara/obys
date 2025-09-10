@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const lastRefresh = document.getElementById('last-refresh');
     const remainingTime = document.getElementById('remaining-time');
     const manualRefreshBtn = document.getElementById('manual-refresh');
-    const sessionId = {{ session.OturumID | tojson }};
+    const sessionId = "{{ session.OturumID }}";
     let countdown;
     let autoRefreshTimer;
 
@@ -98,13 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshQR();
     });
 
-    autoRefreshTimer = setInterval(refreshQR, 5000);
-    resetCountdown();
-
-    window.addEventListener('beforeunload', function() {
-        clearInterval(autoRefreshTimer);
-        clearInterval(countdown);
-    });
+    // Otomatik yenileme kaldırıldı. Sadece manuel yenileme aktif.
 });
 </script>
 
