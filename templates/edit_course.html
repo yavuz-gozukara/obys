@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Ders Düzenle{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm p-4">
+                <h2 class="mb-4 text-center">Ders Düzenle</h2>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="select_course" class="form-label">Ders Seç</label>
+                        <select id="select_course" class="form-select mb-3" onchange="window.location.href='{{ url_for('academic.edit_course', course_id=0) }}'.replace('0', this.value)">
+                            {% for c in all_courses %}
+                                <option value="{{ c.DersID }}" {% if c.DersID == course.DersID %}selected{% endif %}>
+                                    {{ c.DersKodu }} - {{ c.DersAdi }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ders_kodu" class="form-label">Ders Kodu</label>
+                        <input type="text" class="form-control" id="ders_kodu" name="ders_kodu" value="{{ course.DersKodu }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ders_adi" class="form-label">Ders Adı</label>
+                        <input type="text" class="form-control" id="ders_adi" name="ders_adi" value="{{ course.DersAdi }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ders_yili" class="form-label">Ders Yılı</label>
+                        <select class="form-select" id="ders_yili" name="ders_yili" required>
+                            <option value="">Yıl Seçiniz</option>
+                            {% for year in range(current_year - 5, current_year + 2) %}
+                                <option value="{{ year }}-{{ year + 1 }}"
+                                    {% if course.DersYili == year ~ '-' ~ (year + 1) %}selected{% endif %}>
+                                    {{ year }}-{{ year + 1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ders_donemi" class="form-label">Dönem</label>
+                        <select class="form-select" id="ders_donemi" name="ders_donemi" required>
+                            <option value="Güz" {% if course.DersDonemi == 'Güz' %}selected{% endif %}>Güz</option>
+                            <option value="Bahar" {% if course.DersDonemi == 'Bahar' %}selected{% endif %}>Bahar</option>
+                            <option value="Yaz Okulu" {% if course.DersDonemi == 'Yaz Okulu' %}selected{% endif %}>Yaz Okulu</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kredi" class="form-label">Kredi</label>
+                        <input type="number" class="form-control" id="kredi" name="kredi" value="{{ course.Kredi or '' }}">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="devam_zorunlulugu" name="devam_zorunlulugu" value="on" {% if course.DevamZorunluluguVarMi %}checked{% endif %}>
+                        <label class="form-check-label" for="devam_zorunlulugu">
+                            Devam Zorunluluğu Var Mı?
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Kaydet</button>
+                    <a href="{{ url_for('academic.list_courses') }}" class="btn btn-secondary w-100 mt-2">Ders Listesine Dön</a>
+                </form>
+
+                <!-- Silme Butonu -->
+                <button class="btn btn-danger w-100 mt-2" data-bs-toggle="modal" data-bs-target="#deleteCourseModal">Dersi Sil</button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="deleteCourseModal" tabindex="-1" aria-labelledby="deleteCourseModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <form method="POST" action="{{ url_for('academic.delete_course', course_id=course.DersID) }}">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="deleteCourseModalLabel">Ders Silme Onayı</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                        </div>
+                        <div class="modal-body">
+                          <p>
+                            <strong>UYARI:</strong> Bu dersi silerseniz, bu derse ait tüm oturumlar ve devam durumları kalıcı olarak silinecektir.<br>
+                            Silmek istediğinize emin misiniz?
+                          </p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                          <button type="submit" class="btn btn-danger">Sil</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

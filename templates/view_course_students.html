@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.DersKodu }} - {{ course.DersAdi }} Sınıf Listesi{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm p-4">
+                <h2 class="text-center mb-4">{{ course.DersKodu }} - {{ course.DersAdi }} Sınıf Listesi</h2>
+                <hr>
+
+                <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <p class="h5">Toplam Öğrenci Sayısı: {{ course_students|length }}</p>
+                    <div>
+                        <a href="{{ url_for('auth.upload_students_to_course', course_id=course.DersID) }}" class="btn btn-primary me-2">Öğrenci Yükle</a>
+                        <a href="{{ url_for('auth.list_courses') }}" class="btn btn-secondary">Derslerime Geri Dön</a>
+                        <a href="{{ url_for('auth.course_students', course_id=course.DersID) }}" class="btn btn-sm btn-secondary me-2">Sınıf Listesi</a>
+                    </div>
+                </div>
+
+                {% if course_students %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Öğrenci No</th>
+                                <th>Adı Soyadı</th>
+                                <th>E-posta</th>
+                                <th>Sınıfı</th>
+                                <th>Birim Program</th>
+                                <th>Kayıt Durumu</th>
+                                <th>Kayıt Tarihi (Derse)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cs in course_students %}
+                            <tr>
+                                <td>{{ cs.ogrenci_objesi.user_account.OgrenciNo }}</td>
+                                <td>{{ cs.ogrenci_objesi.user_account.Isim }} {{ cs.ogrenci_objesi.user_account.Soyisim }}</td>
+                                <td>{{ cs.ogrenci_objesi.user_account.Email if cs.ogrenci_objesi.user_account.Email else 'Yok' }}</td>
+                                <td>{{ cs.ogrenci_objesi.Sinif if cs.ogrenci_objesi.Sinif else 'N/A' }}</td>
+                                <td>{{ cs.ogrenci_objesi.BirimProgram if cs.ogrenci_objesi.BirimProgram else 'N/A' }}</td>
+                                <td>
+                                    {% if cs.ogrenci_objesi.user_account.is_active_user %}
+                                        <span class="badge bg-success">Aktif Hesap</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Pasif Hesap</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ cs.KayitTarihi.strftime('%Y-%m-%d') if cs.KayitTarihi else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center" role="alert">
+                    Bu derse kayıtlı henüz hiçbir öğrenci bulunmamaktadır.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Akademisyen Paneli{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">Hoş Geldiniz, {{ current_user.Isim }} {{ current_user.Soyisim }}!</h2>
+            <p class="lead">Akademisyen Panelinize hoş geldiniz. Buradan derslerinizi yönetebilir, öğrenci listelerini görebilir ve yoklama oturumları başlatabilirsiniz.</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="row mt-4">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Derslerimi Yönet</h5>
+                    <p class="card-text">Eklediğiniz dersleri görüntüleyin, düzenleyin veya yeni dersler ekleyin.</p>
+                    <a class="btn btn-primary" href="{{ url_for('academic.list_courses') }}">Derslere Git</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Yeni Ders Ekle</h5>
+                    <p class="card-text">Sisteme yeni bir ders tanımlamak için bu seçeneği kullanın.</p>
+                    <a class="btn btn-success" href="{{ url_for('academic.add_course') }}">Ders Ekle</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Yoklama Raporları</h5>
+                    <p class="card-text">Öğrenci devamsızlık durumlarını görüntüleyin ve rapor alın.</p>
+                    <a href="{{ url_for('reporting.reports_dashboard') }}" class="btn btn-warning">Raporları Gör</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

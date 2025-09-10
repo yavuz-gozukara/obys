@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ course.DersAdi }} - Oturumlar</h2>
+    <p>Ders Kodu: {{ course.DersKodu }}</p>
+
+    <a href="{{ url_for('attendance.start_attendance', course_id=course.DersID) }}" class="btn btn-primary mb-3">Yeni Oturum Başlat</a>
+    <a href="{{ url_for('attendance.attendance_report', course_id=course.DersID) }}" class="btn btn-info mb-3 ms-2">Yoklama Raporunu Görüntüle</a>
+    <script>
+function confirmStop(sessionId) {
+    if (confirm('Bu oturumu durdurmak istediğinize emin misiniz? Durdurulan oturum tekrar başlatılamaz.')) {
+        window.location.href = "{{ url_for('attendance.stop_attendance', session_id=0) }}".replace('0', sessionId);
+    }
+}
+
+function deleteSession(sessionId) {
+    if (!confirm("Bu oturumu silmek istediğinize emin misiniz?")) return;
+    fetch(`/delete_session/${sessionId}`, {
+        method: 'POST',
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload(); // Sayfayı yenile
+        } else {
+            alert(data.message || "Silme işlemi başarısız.");
+        }
+    });
+}
+</script>
+
+
+
+    {% if grouped_sessions %}
+        {% for week_num, sessions_in_week in grouped_sessions %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Hafta {{ week_num }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for session in sessions_in_week %}
+                        <li class="list-group-item">
+                            Oturum {{ session.OturumSiraNumarasi }}:
+                            Başlangıç: {{ session.BaslangicZamani.strftime('%d-%m-%Y %H:%M') }}
+                            {% if session.BitisZamani %}
+                                - Bitiş: {{ session.BitisZamani.strftime('%H:%M') }}
+                            {% endif %}
+                            (Aktif: {{ "Evet" if session.AktifMi else "Hayır" }})
+
+                            <div class="float-end">
+                                {% if session.AktifMi %}
+                                    <a href="{{ url_for('attendance.generate_qr', session_id=session.OturumID) }}" class="btn btn-sm btn-success">QR Kodu Görüntüle</a>
+                                    <a href="{{ url_for('attendance.stop_attendance', session_id=session.OturumID) }}" class="btn btn-sm btn-warning">Durdur</a>
+                                {% else %}
+                                    <span class="text-muted">Oturum Sonlandı</span>
+                                    <a href="{{ url_for('attendance.generate_qr', session_id=session.OturumID) }}" class="btn btn-sm btn-outline-info">QR Kodu Tekrar Görüntüle</a>
+                                {% endif %}
+                            </div>
+                            {% if not session.AktifMi %}
+    <button type="button" class="btn btn-sm btn-danger ms-2"
+        onclick="deleteSession({{ session.OturumID }})">
+        <i class="fas fa-trash"></i> Sil
+    </button>
+    {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Bu ders için henüz oturum bulunmamaktadır.</p>
+    {% endif %}
+
+    <a href="{{ url_for('academic.dashboard') }}" class="btn btn-secondary mt-3">Akademisyen Paneline Dön</a>
+    
+</div>
+{% endblock %}

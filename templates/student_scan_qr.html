@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}QR Kod Okut - Ders Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h2 class="text-center mb-4">QR Kod Okut</h2>
+                <p class="text-center text-muted">Lütfen size verilen QR kod verisini aşağıdaki alana girin veya kameranızla okutun.</p>
+
+                <form method="POST" action="{{ url_for('student.qr_scan') }}"> {# Form action qr_scan olarak değiştirildi #}
+                    <div class="mb-3">
+                        <label for="qr_data" class="form-label">QR Kod Verisi</label>
+                        <input type="text" class="form-control" id="qr_data" name="qr_data" required placeholder="QR kodundan gelen veriyi buraya yapıştırın">
+                        <div class="form-text">Örnek: Y291cnNlOjE7c2Vzc2lvbjoxO3RpbWU6MTcwNTQ4NzY2Ny4xMjM=</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Yoklamayı Kaydet</button>
+                </form>
+
+                <hr class="my-4">
+                <p class="text-center">Veya kameranız ile okutmak için:</p>
+                <div id="qr-reader" style="width:100%"></div>
+                <div id="qr-reader-results"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+  <h5>Bu oturuma katılan öğrenciler:</h5>
+  <ul id="live-students"></ul>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+    function onScanSuccess(decodedText, decodedResult) {
+        // Handle on success condition with the decoded text and result.
+        console.log(`Code matched = ${decodedText}`, decodedResult);
+        document.getElementById('qr_data').value = decodedText;
+        document.querySelector('form').submit(); // Automatically submit the form
+        html5QrcodeScanner.clear(); // Stop the scanner
+    }
+
+    function onScanError(errorMessage) {
+        // Handle scan error.
+        // console.warn(`Code scan error = ${errorMessage}`);
+    }
+
+    var html5QrcodeScanner = new Html5QrcodeScanner(
+        "qr-reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess, onScanError);
+
+    // Oturum ID'sini backend'den alın (ör: bir değişken olarak gönderin)
+    var session_id = "{{ session_id|default('') }}";
+    var socket = io();
+
+    // Odaya katıl
+    if (session_id) {
+      socket.emit('join', {room: 'session_' + session_id});
+    }
+
+    // Canlı öğrenci güncellemesi
+    socket.on('attendance_update', function(data) {
+      var ul = document.getElementById('live-students');
+      var li = document.createElement('li');
+      li.textContent = data.student_no + " - " + data.student_name;
+      ul.appendChild(li);
+    });
+</script>
+{% endblock %}

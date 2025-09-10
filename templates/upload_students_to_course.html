@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Öğrenci Listesi Yükle - {{ course.DersKodu }} {{ course.DersAdi }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm p-4">
+                <h2 class="text-center mb-4">{{ course.DersKodu }} - {{ course.DersAdi }} İçin Öğrenci Listesi Yükle</h2>
+                <p class="text-center text-muted">Lütfen öğrencilerinizi içeren bir **CSV** veya **Excel (.xlsx/.xls)** dosyası yükleyin.</p>
+                <hr>
+
+                <div class="alert alert-info">
+                    <h5>Gerekli ve İsteğe Bağlı Sütun Başlıkları ve Notlar:</h5>
+                    <p>Dosyanızın ilk satırında aşağıdaki sütun başlıkları **tam olarak bu şekilde** yer almalıdır (büyük/küçük harf ve boşluklara dikkat!).</p>
+                    <ul class="list-unstyled">
+                        <li><strong>Zorunlu Sütunlar:</strong></li>
+                        <ul>
+                            <li><code>Öğrenci No</code> (Benzersiz olmalıdır)</li>
+                            <li><code>Adı</code></li>
+                            <li><code>Soyadı</code></li>
+                        </ul>
+                        <li><strong>İsteğe Bağlı Sütunlar:</strong></li>
+                        <ul>
+                            <li><code>Email</code> (Boş bırakılabilir)</li>
+                            <li><code>Sınıfı</code></li>
+                            <li><code>Birim Program</code></li>
+                        </ul>
+                    </ul>
+                    <p><strong>Önemli Notlar:</strong></p>
+                    <ul>
+                        <li>Yüklenen bir **öğrenci numarası** sistemde **zaten kayıtlı (aktif) bir öğrenciye aitse**, o öğrencinin **Adı, Soyadı, Sınıfı, Birim Programı** bilgileri güncellenir.</li>
+                        <li>Yüklenen bir **öğrenci numarası** sistemde **pasif olarak kayıtlıysa** (yani daha önce başka bir akademisyen tarafından Excel ile eklenmişse), o öğrencinin bilgileri güncellenir ve bu dersle ilişkilendirilir.</li>
+                        <li>Yeni eklenen öğrenciler sisteme **pasif** olarak kaydedilir ve otomatik bir geçici şifre atanır. Öğrencilerin hesaplarını aktifleştirmek için kendi e-postaları veya öğrenci numaraları ile kayıt sayfasından giriş yapmaları gerekmektedir.</li>
+                    </ul>
+                </div>
+
+                <form method="POST" action="{{ url_for('academic.upload_students_to_course', course_id=course.DersID) }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Dosya Seç</label>
+                        <input class="form-control" type="file" id="file" name="file" accept=".csv, .xlsx, .xls" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Dosyayı Yükle ve Öğrencileri Ata</button>
+                </form>
+
+                <div class="mt-4 text-center">
+                    <a href="{{ url_for('academic.list_courses') }}" class="btn btn-secondary">Derslerime Geri Dön</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

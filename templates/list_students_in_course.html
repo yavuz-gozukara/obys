@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.DersKodu }} - Öğrenciler{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">{{ course.DersKodu }} - {{ course.DersAdi }} Öğrencileri</h2>
+    <p class="lead">Bu derse kayıtlı toplam {{ students|length }} öğrenci bulunmaktadır.</p>
+    
+    <div class="mb-3">
+        {# ders_id yerine course_id kullanıldı #}
+        <a href="{{ url_for('auth.upload_students_to_course', course_id=course.DersID) }}" class="btn btn-success me-2">
+            <i class="fas fa-upload me-1"></i> Öğrenci Yükle
+        </a>
+        <a href="{{ url_for('auth.list_courses') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Ders Listesine Geri Dön
+        </a>
+    </div>
+
+    {% if students %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Öğrenci No</th>
+                    <th>Ad Soyad</th>
+                    <th>E-posta</th>
+                    <th>Sınıf</th>
+                    <th>Program</th>
+                    <th>Aktif Mi?</th>
+                    {# RegistrationType modelde olmadığı için yorum satırı yapıldı #}
+                    {# <th>Kayıt Türü</th> #}
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ student.OgrenciNo }}</td>
+                    {# Ad ve Soyad user_account objesinden alındı #}
+                    <td>{{ student.user_account.Isim }} {{ student.user_account.Soyisim }}</td>
+                    {# Email user_account objesinden alındı #}
+                    <td>{{ student.user_account.Email if student.user_account.Email else '-' }}</td>
+                    {# Sinif ve BirimProgram doğrudan student objesinden alındı #}
+                    <td>{{ student.Sinif if student.Sinif else '-' }}</td>
+                    <td>{{ student.BirimProgram if student.BirimProgram else '-' }}</td>
+                    <td>
+                        {# is_active_user user_account objesinden alındı ve renkler uygulandı #}
+                        {% if student.user_account.is_active_user %}
+                            <span class="badge bg-success">Evet</span>
+                        {% else %}
+                            <span class="badge bg-danger">Hayır</span> {# Pasif öğrenciler için kırmızı yapıldı #}
+                        {% endif %}
+                    </td>
+                    {# RegistrationType modelde olmadığı için boş bırakıldı/yorum satırı yapıldı #}
+                    {# <td>{{ student.RegistrationType if student.RegistrationType else '-' }}</td> #}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        Bu derse henüz hiçbir öğrenci kayıtlı değil. Yukarıdaki "Öğrenci Yükle" butonu ile başlayabilirsiniz.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

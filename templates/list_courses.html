@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Derslerim - Ders Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Derslerim</h2>
+
+    {% if courses %}
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Ders Kodu</th>
+                        <th scope="col">Ders Adı</th>
+                        <th scope="col">Yıl</th>
+                        <th scope="col">Dönem</th>
+                        <th scope="col">Kredi</th>
+                        <th scope="col">Devam Zorunluluğu</th>
+                        <th scope="col">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                        <tr>
+                            <td>{{ course.DersKodu }}</td>
+                            <td>{{ course.DersAdi }}</td>
+                            <td>{{ course.DersYili }}</td>
+                            <td>{{ course.DersDonemi }}</td>
+                            <td>{{ course.Kredi if course.Kredi is not none else '-' }}</td>
+                            <td>
+    {% if course.DevamZorunluluguVarMi %}
+        <span class="badge bg-success">Var</span>
+    {% else %}
+        <span class="badge bg-warning text-dark">Yok</span>
+    {% endif %}
+</td>
+                            <td>
+                                <a href="{{ url_for('academic.upload_students_to_course', course_id=course.DersID) }}" class="btn btn-sm btn-info me-2">Öğrenci Yükle</a>
+                                <a href="{{ url_for('academic.course_students', course_id=course.DersID) }}" class="btn btn-sm btn-secondary me-2">Sınıf Listesi</a>
+                                <a href="{{ url_for('attendance.view_course_sessions', course_id=course.DersID) }}" class="btn btn-sm btn-primary me-2">Yoklama Oturumları</a>
+                                <a href="{{ url_for('academic.edit_course', course_id=course.DersID) }}" class="btn btn-sm btn-warning me-2">Düzenle</a>
+                                <form method="POST" action="{{ url_for('academic.delete_course', course_id=course.DersID) }}" style="display:inline;" onsubmit="return confirm('Dersi ve tüm ilişkili kayıtları silmek istediğinize emin misiniz?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Henüz eklenmiş bir dersiniz bulunmuyor. <a href="{{ url_for('academic.add_course') }}">Yeni bir ders eklemek için tıklayın.</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

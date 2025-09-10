@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.DersAdi }} - Devamsızlık Grafiği{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">{{ course.DersAdi }} - Devamsızlık Grafiği</h2>
+    <p class="lead">Bu ders için öğrencilerin devamsızlık yüzdelerini gösteren grafik.</p>
+
+    <div class="mb-3">
+        <a href="{{ url_for('general_reports') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Genel Raporlara Dön
+        </a>
+        <a href="{{ url_for('download_absence_report_excel', course_id=course.DersID) }}" class="btn btn-success ms-2">
+            <i class="fas fa-file-excel me-1"></i> Excel İndir
+        </a>
+    </div>
+
+    {% if plot_url %}
+    <div class="card shadow-sm p-4 text-center">
+        <img src="data:image/png;base64,{{ plot_url }}" class="img-fluid" alt="Devamsızlık Grafiği">
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        {{ message if message else 'Grafik oluşturulamadı veya veri bulunamadı.' }}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

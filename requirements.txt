@@ -1,0 +1,16 @@
+Flask==2.3.3
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-SocketIO==5.3.0
+Werkzeug==2.3.7 # Flask ile uyumlu sürüm
+python-dotenv==1.0.0 # Çevre değişkenleri için (opsiyonel ama iyi bir pratik)
+gunicorn
+eventlet
+python-engineio==4.9.0 # Flask-SocketIO için gerekli
+python-socketio==5.11.0 # Flask-SocketIO için gerekli
+pandas==2.1.4
+openpyxl==3.1.2 # Excel dosyalarını okumak için pandas'ın ihtiyacı olabilir
+qrcode==7.4.2
+matplotlib==3.8.2
+numpy==1.26.2
+psycopg2-binary

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıt Ol{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h2 class="text-center mb-4">Kayıt Ol</h2>
+                <hr>
+
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('auth.register') }}">
+                    <div class="mb-3">
+                        <label for="ad" class="form-label">Ad</label>
+                        <input type="text" class="form-control" id="ad" name="ad" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="soyad" class="form-label">Soyad</label>
+                        <input type="text" class="form-control" id="soyad" name="soyad" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-posta (@ogr.bandirma.edu.tr)</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ogrenci_no" class="form-label">Öğrenci Numarası</label>
+                        <input type="text" class="form-control" id="ogrenci_no" name="ogrenci_no" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Şifre</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password2" class="form-label">Şifre Tekrar</label>
+                        <input type="password" class="form-control" id="password2" name="password2" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Kayıt Ol</button>
+                    <p class="mt-3 text-center">Zaten hesabınız var mı? <a href="{{ url_for('auth.login') }}">Giriş Yap</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sadece öğrenci kaydı yapılabilir, ek JS gereksiz -->
+{% endblock %}

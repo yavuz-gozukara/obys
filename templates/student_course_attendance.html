@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">{{ course.DersAdi }} Katılım Tablosu</h2>
+    <div class="alert alert-info">
+        Toplam Devamsızlık: <strong>{{ '%.2f' % total_absence }}</strong> hafta /
+        Kalan Hakkınız: <strong>{{ '%.2f' % remaining_absence }}</strong> hafta /
+        Maksimum: <strong>{{ max_allowed_absence }}</strong> hafta
+    </div>
+    <table class="table table-bordered table-hover align-middle text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Hafta</th>
+                <th>Oturum</th>
+                <th>Durum</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for week in weekly_attendance %}
+                {% for session in week.sessions %}
+                <tr>
+                    {% if loop.first %}
+                        <td rowspan="{{ week.total_sessions }}">{{ week.week }}</td>
+                    {% endif %}
+                    <td>{{ session.order }}</td>
+                    <td>
+                        {% if session.attended %}
+                            <span class="badge bg-success">Katıldı</span>
+                        {% else %}
+                            <span class="badge bg-danger">Katılmadı</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="alert alert-warning mt-3">
+        <strong>Not:</strong> Bir haftada birden fazla oturum varsa, katılmadığınız her oturum haftalık devamsızlık hakkınızdan orantılı olarak düşülür.
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary text-center">Öğrenci Paneli</h2>
+    <div class="row mb-3">
+        <div class="col text-end">
+            <a href="{{ url_for('student.qr_scan') }}" class="btn btn-success">
+                <i class="bi bi-qr-code-scan"></i> QR Kod ile Yoklamaya Katıl
+            </a>
+        </div>
+    </div>
+    <div class="row g-4">
+        {% if registered_courses %}
+            {% for course in registered_courses %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-info">{{ course.DersAdi }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ course.DersKodu }}</h6>
+                        <p class="mb-1"><strong>Akademisyen:</strong> {{ course.akademisyen.user_account.Isim }} {{ course.akademisyen.user_account.Soyisim }}</p>
+                        <p class="mb-1"><strong>Dönem:</strong> {{ course.DersDonemi }} <strong>Yıl:</strong> {{ course.DersYili }}</p>
+                        <a href="{{ url_for('student.student_course_attendance', course_id=course.DersID) }}" class="btn btn-outline-primary mt-3">Katılım Detayları</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    Kayıtlı dersiniz bulunmamaktadır.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

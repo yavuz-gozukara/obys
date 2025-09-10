@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}{{ data.course.DersKodu }} Raporları - Ders Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">{{ data.course.DersKodu }} - {{ data.course.DersAdi }} Raporları</h2>
+    
+    <div class="alert alert-info">
+        <strong>Devamsızlık Politikası:</strong> 
+        <ul class="mb-0">
+            <li>Toplam ders haftası: {{ data.total_weeks }}</li>
+            <li>İşlenen hafta sayısı: {{ data.completed_weeks }}</li>
+            <li>Öğrenciler maksimum {{ data.max_allowed_absences }} hafta devamsızlık hakkına sahiptir</li>
+            <li>5. devamsızlıkta dersten kalırlar</li>
+            <li>Hesaplamalar sadece oturum oluşturulmuş haftalar üzerinden yapılmaktadır</li>
+        </ul>
+    </div>
+
+    <!-- Grafikler Bölümü -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white" data-bs-toggle="collapse" href="#graphsSection">
+            <h5 class="mb-0">Grafikler <i class="fas fa-chevron-down float-end"></i></h5>
+            
+        </div>
+        <div id="graphsSection" class="collapse">
+            <div class="card-body">
+                <div class="row">
+                    <!-- Haftalık Katılım Grafiği -->
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h6>Haftalık Katılım Durumu</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- Hafta Seçim Formu -->
+                                <form method="get" class="mb-3">
+                                  <label for="week_select">Hafta Seç:</label>
+                                  <select name="week" id="week_select" onchange="this.form.submit()">
+                                    <option value="">Genel</option>
+                                    {% for week in data.weekly_data %}
+                                      <option value="{{ week.week }}"
+    {% if request.args.get('week') and request.args.get('week')|int == week.week %}
+        selected
+    {% endif %}
+>Hafta {{ week.week }}</option>
+                                    {% endfor %}
+                                  </select>
+                                </form>
+                                <!-- Grafik ve İndirme Butonu -->
+                                <img src="{{ url_for('reporting.weekly_attendance_chart', course_id=data.course.DersID) }}{% if request.args.get('week') %}?week={{ request.args.get('week') }}{% endif %}" alt="Haftalık Katılım" class="img-fluid">
+                                <a href="{{ url_for('reporting.weekly_attendance_chart', course_id=data.course.DersID) }}{% if request.args.get('week') %}?week={{ request.args.get('week') }}{% endif %}" download="haftalik_katilim.png" class="btn btn-outline-primary mt-2">Grafiği İndir</a>
+                                <a href="{{ url_for('reporting.overall_attendance_pie', course_id=data.course.DersID) }}" download="genel_katilim.png" class="btn btn-outline-success mt-2">Genel Grafiği İndir</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Genel Katılım Grafiği -->
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h6>Genel Katılım Oranı</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if data.completed_weeks > 0 %}
+                                    <img src="data:image/png;base64,{{ overall_pie }}" alt="Genel Katılım" class="img-fluid">
+                                    <p class="mt-2">
+                                        Toplam Katılım: {{ data.overall_attendance.present }}<br>
+                                        Toplam Devamsızlık: {{ data.overall_attendance.absent }}<br>
+                                        Katılım Oranı: {{ data.overall_attendance.rate|round(1) }}%
+                                    </p>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        Genel katılım grafiği için yeterli veri bulunmamaktadır.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Devamsızlık Durumu Bölümü -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark" data-bs-toggle="collapse" href="#attendanceSection">
+            <h5 class="mb-0">Devamsızlık Durumu <i class="fas fa-chevron-down float-end"></i></h5>
+        </div>
+        <div id="attendanceSection" class="collapse">
+            <div class="card-body">
+                <div class="row">
+                    <!-- Devamsızlıktan Kalan Öğrenciler -->
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-danger text-white">
+                                <h6>Devamsızlıktan Kalan Öğrenciler ({{ data.failing_students|length }})</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if data.failing_students %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Öğrenci No</th>
+                                                    <th>Ad Soyad</th>
+                                                    <th>Devamsızlık</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for student in data.failing_students %}
+                                                <tr>
+                                                    <td>{{ student.student_no }}</td>
+                                                    <td>{{ student.name }}</td>
+                                                    <td>{{ student.absence_count }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <a href="{{ url_for('reporting.failing_students_report', course_id=data.course.DersID) }}" 
+                                       class="btn btn-sm btn-outline-danger">
+                                        CSV Olarak İndir
+                                    </a>
+                                {% else %}
+                                    <div class="alert alert-success">
+                                        Devamsızlıktan kalan öğrenci bulunmamaktadır.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sınırda Olan Öğrenciler -->
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-warning text-dark">
+                                <h6>Sınırda Olan Öğrenciler ({{ data.borderline_students|length }})</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if data.borderline_students %}
+                                    <div class="alert alert-warning">
+                                        <strong>Uyarı:</strong> Bu öğrenciler tam sınırda! Bir daha devamsızlık yaparlarsa dersten kalacaklar.
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Öğrenci No</th>
+                                                    <th>Ad Soyad</th>
+                                                    <th>Devamsızlık</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for student in data.borderline_students %}
+                                                <tr>
+                                                    <td>{{ student.student_no }}</td>
+                                                    <td>{{ student.name }}</td>
+                                                    <td>{{ student.absence_count }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <a href="{{ url_for('reporting.borderline_students_report', course_id=data.course.DersID) }}" 
+                                       class="btn btn-sm btn-outline-warning">
+                                        CSV Olarak İndir
+                                    </a>
+                                {% else %}
+                                    <div class="alert alert-success">
+                                        Sınırda olan öğrenci bulunmamaktadır.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sınıf Listesi Bölümü -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white" data-bs-toggle="collapse" href="#classListSection">
+            <h5 class="mb-0">Sınıf Listesi <i class="fas fa-chevron-down float-end"></i></h5>
+        </div>
+        <div id="classListSection" class="collapse">
+            <div class="card-body">
+                {% if data.class_list %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Öğrenci No</th>
+                                    <th>Ad Soyad</th>
+                                    <th>E-posta</th>
+                                    <th>Sınıf</th>
+                                    <th>Program</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in data.class_list %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ student.student_no }}</td>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.email }}</td>
+                                    <td>{{ student.class }}</td>
+                                    <td>{{ student.program }}</td>
+                                    <td>
+                                      {% if student.active == 'Aktif' %}
+                                        <span class="badge bg-success px-3 py-2">Aktif</span>
+                                      {% else %}
+                                        <span class="badge bg-danger px-3 py-2">Pasif</span>
+                                      {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{{ url_for('reporting.class_list_report', course_id=data.course.DersID) }}" 
+                       class="btn btn-outline-info">
+                        CSV Olarak İndir
+                    </a>
+                {% else %}
+                    <div class="alert alert-warning">
+                        Bu derse kayıtlı öğrenci bulunmamaktadır.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Tüm Öğrencilerin Katılım Durumu -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white" data-bs-toggle="collapse" href="#allStudentsSection">
+            <h5 class="mb-0">Tüm Öğrencilerin Katılım Durumu <i class="fas fa-chevron-down float-end"></i></h5>
+        </div>
+        <div id="allStudentsSection" class="collapse">
+            <div class="card-body">
+                {% if data.completed_weeks > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Öğrenci No</th>
+                                    <th>Ad Soyad</th>
+                                    <th>Katıldığı Hafta</th>
+                                    <th>Devamsızlık</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in data.student_attendance %}
+                                <tr>
+                                    <td>{{ student.student_no }}</td>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.attended_weeks }}</td>
+                                    <td>{{ student.absence_count }}</td>
+                                    <td class="{{ student.status_class }}">{{ student.status }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{{ url_for('reporting.full_attendance_report', course_id=data.course.DersID) }}" 
+                       class="btn btn-outline-secondary">
+                        CSV Olarak İndir
+                    </a>
+                {% else %}
+                    <div class="alert alert-warning">
+                        Henüz hiç yoklama oturumu oluşturulmadığı için katılım durumu hesaplanamıyor.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigasyon Butonları -->
+    <div class="mt-4">
+        <a href="{{ url_for('reporting.reports_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Raporlar Ana Sayfasına Dön
+        </a>
+        <a href="{{ url_for('attendance.view_course_sessions', course_id=data.course.DersID) }}" class="btn btn-primary ms-2">
+            <i class="fas fa-chalkboard me-1"></i> Yoklama Oturumlarına Git
+        </a>
+        <a href="{{ url_for('reporting.course_reports', course_id=data.course.DersID) }}" class="btn btn-info ms-2">
+            <i class="fas fa-users me-1"></i> Sınıf Listesine Git
+        </a>
+    </div>
+</div>
+
+<script>
+    // Collapsible bölümleri yönetmek için JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tüm collapsible başlıkları seç
+        const headers = document.querySelectorAll('.card-header[data-bs-toggle="collapse"]');
+        
+        // Her başlık için olay dinleyici ekle
+        headers.forEach(header => {
+            header.addEventListener('click', function() {
+                // İkonu güncelle
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('fa-chevron-down')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .card-header {
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .card-header:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    .table th {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}

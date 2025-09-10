@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.DersAdi }} - Sınırda Olan Öğrenciler{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">{{ course.DersAdi }} - Sınırda Olan Öğrenciler</h2>
+    <p class="lead">Devamsızlık yüzdesi kalan sınırına ({{ max_absence_percentage }}%) yakın olan ({{ max_absence_percentage - borderline_threshold }}% - {{ max_absence_percentage }}% arası) öğrenciler.</p>
+
+    <div class="mb-3">
+        <a href="{{ url_for('auth.general_reports') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Genel Raporlara Dön
+        </a>
+         <a href="{{ url_for('auth.download_borderline_students_excel', course_id=course.DersID) }}" class="btn btn-success ms-2">
+            <i class="fas fa-file-excel me-1"></i> Excel İndir
+        </a>
+    </div>
+
+    {% if not course.DevamZorunluluguVarMi %}
+        <div class="alert alert-info" role="alert">
+            Bu ders için devam zorunluluğu bulunmamaktadır. Bu rapor bu nedenle geçerli değildir.
+        </div>
+    {% elif borderline_students %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Öğrenci No</th>
+                        <th>Adı Soyadı</th>
+                        <th>Email</th>
+                        <th>Katıldığı Oturum Sayısı</th>
+                        <th>Toplam Oturum Sayısı</th>
+                        <th>Devamsızlık Yüzdesi (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in borderline_students %}
+                    <tr>
+                        <td>{{ student.OgrenciNo }}</td>
+                        <td>{{ student.Isim }} {{ student.Soyisim }}</td>
+                        <td>{{ student.Email }}</td>
+                        <td>{{ student.KatildigiOturumSayisi }}</td>
+                        <td>{{ student.ToplamOturumSayisi }}</td>
+                        <td class="text-warning fw-bold">{{ "%.2f"|format(student.DevamsizlikYuzdesi) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-success" role="alert">
+            Bu ders için sınırda olan öğrenci bulunmamaktadır.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

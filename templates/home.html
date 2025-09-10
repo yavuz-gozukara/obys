@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1>Katılımcı Takip Sistemine Hoş Geldiniz!</h1>
+    <p class="lead">Derse katılımı yönetmek ve takip etmek için güvenli ve kolay çözümünüz.</p>
+    <hr class="my-4">
+    <p>Giriş yapmak veya yeni bir hesap oluşturmak için aşağıdaki bağlantıları kullanın:</p>
+    {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg me-2">Giriş Yap</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-lg">Kayıt Ol</a>
+    {% else %}
+        <p>Zaten giriş yapmışsınız. Devam etmek için:</p>
+        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-info btn-lg">Paneline Git</a>
+    {% endif %}
+</div>
+{% endblock %}

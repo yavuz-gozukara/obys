@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Raporlar - Ders Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Raporlar</h2>
+    <p class="lead">Aşağıdaki dersleriniz için rapor oluşturabilirsiniz.</p>
+
+    {% if courses %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Ders Kodu</th>
+                        <th>Ders Adı</th>
+                        <th>Yıl</th>
+                        <th>Dönem</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                        <tr>
+                            <td>{{ course.DersKodu }}</td>
+                            <td>{{ course.DersAdi }}</td>
+                            <td>{{ course.DersYili }}</td>
+                            <td>{{ course.DersDonemi }}</td>
+                            <td>
+                                <a href="{{ url_for('reporting.course_reports', course_id=course.DersID) }}" class="btn btn-sm btn-primary">Raporları Görüntüle</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Henüz dersiniz bulunmamaktadır. Rapor oluşturabilmek için önce ders ekleyin.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

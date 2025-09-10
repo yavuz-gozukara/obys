@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Öğrenci Listesi Yükle{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>'{{ ders.DersAdi }}' Dersi İçin Öğrenci Listesi Yükle</h2>
+        <a href="{{ url_for('auth.list_courses') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Ders Listesine Dön
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert-container mb-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="card p-4 shadow-sm">
+        <p class="card-text">Lütfen öğrenci listesini içeren bir CSV veya Excel dosyası (.csv, .xlsx, .xls) yükleyin.</p>
+        <p class="card-text text-muted">Dosyanızın ilk satırı (başlık satırı) aşağıdaki sütun başlıklarını **birebir** içermelidir:<br>
+            `OgrenciNo`, `Ad`, `Soyad`, `Sinif`, `BirimProgram`, `KayitlanmaTarihi`, `DevamliDevamsiz`, `DevamZorunluluguVarMi`<br>
+            `Email` sütunu isteğe bağlıdır. `DevamZorunluluguVarMi` için 'Evet'/'Hayır' veya 'True'/'False' gibi değerler kullanabilirsiniz.
+        </p>
+        <hr>
+        <form method="POST" action="{{ url_for('academic.upload_students', ders_id=ders.DersID) }}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file" class="form-label">Öğrenci Listesi Dosyası Seç</label>
+                <input type="file" class="form-control" id="file" name="file" accept=".csv, .xlsx, .xls" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Öğrenci Listesini Yükle</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

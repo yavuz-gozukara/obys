@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{{ course.DersAdi }} Dersi Öğrenci Listesi</h2>
+    <p class="text-muted">Ders Kodu: {{ course.DersKodu }} | Akademisyen: {{ course.akademisyen.user_account.Isim }} {{ course.akademisyen.user_account.Soyisim }}</p>
+
+    {% if students %}
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Öğrenci Numarası</th>
+                    <th scope="col">Adı</th>
+                    <th scope="col">Soyadı</th>
+                    <th scope="col">E-posta</th> {# E-posta sütunu soyadının yanına taşındı #}
+                    <th scope="col">Durum</th>
+                    <th scope="col">İşlemler</th> {# Yeni sütun eklendi #}
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ student.OgrenciNo }}</td>
+                    <td>{{ student.user.Isim }}</td>
+                    <td>{{ student.user.Soyisim }}</td>
+                    <td>{{ student.user.Email or 'Yok' }}</td>
+                    <td class="{{ 'text-success' if student.user.is_active_user else 'text-danger' }}">
+                        {% if student.user.is_active_user %}
+                            Aktif
+                        {% else %}
+                            Pasif
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('academic.remove_student_from_course', course_id=course.DersID, student_id=student.OgrenciID) }}" style="display:inline;" onsubmit="return confirm('Bu öğrenciyi dersten silmek istediğinize emin misiniz?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Sil</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        Bu derse henüz kayıtlı öğrenci bulunmamaktadır.
+    </div>
+    {% endif %}
+
+    {% if active_session %}
+    <div class="accordion mb-3" id="liveAttendanceAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingLive">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLive" aria-expanded="false" aria-controls="collapseLive">
+            Canlı Yoklama (Oturum {{ active_session.OturumNumarasi }}-{{ active_session.OturumSiraNumarasi }})
+          </button>
+        </h2>
+        <div id="collapseLive" class="accordion-collapse collapse" aria-labelledby="headingLive" data-bs-parent="#liveAttendanceAccordion">
+          <div class="accordion-body">
+            <ul id="live-student-list" class="list-group">
+              <!-- Canlı gelen öğrenciler burada JS ile güncellenecek -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+      const socket = io();
+      socket.emit('join', {room: 'session_{{ active_session.OturumID }}'});
+      socket.on('attendance_update', function(data) {
+        const ul = document.getElementById('live-student-list');
+        const li = document.createElement('li');
+        li.className = "list-group-item";
+        li.textContent = data.student_no + " - " + data.student_name;
+        ul.appendChild(li);
+      });
+    </script>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ url_for('attendance.view_course_sessions', course_id=course.DersID) }}" class="btn btn-info me-2">Oturumları Görüntüle</a>
+        <a href="{{ url_for('academic.upload_students_to_course', course_id=course.DersID) }}" class="btn btn-primary me-2">Öğrenci Yükle</a>
+        <a href="{{ url_for('academic.dashboard') }}" class="btn btn-secondary">Ana Sayfaya Dön</a>
+    </div>
+</div>
+{% endblock %}

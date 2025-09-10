@@ -1,0 +1,18 @@
+proje/
+├── app.py                 # Ana uygulama giriş noktası
+├── config.py              # Konfigürasyon ayarları
+├── requirements.txt
+├── models.py              # DB modelleri (değişmeyecek)
+├── extensions.py          # Flask eklentileri
+├── utils/                 # Yardımcı fonksiyonlar
+│   ├── auth.py            # Kimlik doğrulama yardımcıları
+│   ├── reporting.py       # Raporlama fonksiyonları
+│   ├── qr.py              # QR kod işlemleri
+│   └── file_handling.py   # Dosya işlemleri
+├── blueprints/
+│   ├── auth.py            # Kimlik doğrulama rotaları
+│   ├── academic.py        # Akademisyen rotaları
+│   ├── student.py         # Öğrenci rotaları
+│   ├── attendance.py      # Yoklama rotaları
+│   └── reporting.py       # Raporlama rotaları
+└── templates/             # Şablonlar (mevcut yapı korunacak)

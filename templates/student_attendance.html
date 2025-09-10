@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ course.DersAdi }} - Yoklama Oturumu Başlat</h2>
+    <p>Ders Kodu: {{ course.DersKodu }}</p>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label for="week_number" class="form-label">Hafta Numarası:</label>
+            <select class="form-select" id="week_number" name="week_number" required>
+                <option value="">Hafta Seçiniz</option>
+                {% for i in range(1, 15) %} {# Örneğin 14 hafta varsayımı #}
+                    <option value="{{ i }}">Hafta {{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- ... diğer kodlar ... -->
+<div class="mb-3">
+    <label class="form-label">Oturum Tipi:</label><br>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="action_type" id="new_week_session" value="new_week">
+        <label class="form-check-label" for="new_week_session">
+            Yeni Hafta Başlat (Hafta {{ next_week }})
+        </label>
+    </div>
+    {% if last_week > 0 %}
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="action_type" id="add_session_to_week" value="add_session_to_week" checked>
+        <label class="form-check-label" for="add_session_to_week">
+            Mevcut Haftaya Oturum Ekle (Hafta {{ last_week }})
+        </label>
+    </div>
+    {% endif %}
+</div>
+<!-- ... diğer kodlar ... -->
+
+        <button type="submit" class="btn btn-primary">Oturum Başlat</button>
+    </form>
+
+    <hr>
+    <h3>Mevcut Oturumlar</h3>
+    {% if existing_week_numbers %}
+    <p>Bu ders için daha önce oturum açılan haftalar:
+        {% for week in existing_week_numbers %}
+            <span class="badge bg-info text-dark">Hafta {{ week }}</span>
+        {% endfor %}
+    </p>
+    {% else %}
+    <p>Bu derste henüz aktif oturum bulunmamaktadır.</p>
+    {% endif %}
+
+    <a href="{{ url_for('attendance.view_course_sessions', course_id=course.DersID) }}" class="btn btn-secondary mt-3">Tüm Oturumları Görüntüle</a>
+</div>
+{% endblock %}

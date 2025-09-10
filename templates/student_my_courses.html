@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıtlı Derslerim{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm p-4">
+                
+                <hr>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mb-3">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% if my_courses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ders Kodu</th>
+                                    <th>Ders Adı</th>
+                                    <th>Ders Yılı/Dönemi</th>
+                                    <th>Kredi</th>
+                                    <th>Devam Zorunluluğu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in my_courses %}
+                                <tr>
+                                    <td>{{ course.DersKodu }}</td>
+                                    <td>{{ course.DersAdi }}</td>
+                                    <td>{{ course.DersYili }} / {{ course.DersDonemi }}</td>
+                                    <td>{{ course.Kredi if course.Kredi else 'N/A' }}</td>
+                                    <td>
+                                        {% if course.DevamZorunluluguVarMi %}
+                                            Evet
+                                        {% else %}
+                                            Hayır
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mt-5">
+                        Henüz kayıtlı olduğunuz bir ders bulunmuyor.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

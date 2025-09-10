@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.DersKodu }} - Yoklama Raporu{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2>{{ course.DersAdi }} - Yoklama Raporu</h2>
+    <p>Ders Kodu: {{ course.DersKodu }}</p>
+
+    {% if report_data %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Öğrenci No</th>
+                        <th>Adı Soyadı</th>
+                        {% for week_num in sorted_week_numbers %}
+                            <th colspan="{{ grouped_sessions[week_num]|length }}" class="text-center">Hafta {{ week_num }}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        {% for week_num in sorted_week_numbers %}
+                            {% for session in grouped_sessions[week_num] %}
+                                <th class="text-center">Oturum {{ session.OturumSiraNumarasi }}</th>
+                            {% endfor %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student_id, data in report_data.items() %}
+                        <tr>
+                            <td>{{ data.student_no }}</td>
+                            <td>{{ data.student_name }}</td>
+                            {% for week_num in sorted_week_numbers %}
+                                {% for session in grouped_sessions[week_num] %}
+                                    {% set session_key = session.OturumNumarasi ~ '-' ~ session.OturumSiraNumarasi %}
+                                    <td class="text-center">
+                                        {% if data.attendance[session_key] == 'X' %}
+                                            Var
+                                        {% else %}
+                                            Yok
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="{{ url_for('attendance.download_attendance_report', course_id=course.DersID) }}" class="btn btn-outline-info mt-3">CSV Olarak İndir</a>
+        </div>
+    {% else %}
+        <p>Bu ders için henüz yoklama kaydı bulunmamaktadır.</p>
+    {% endif %}
+
+    <a href="{{ url_for('attendance.view_course_sessions', course_id=course.DersID) }}" class="btn btn-secondary mt-3">Oturum Listesine Dön</a>
+    <a href="{{ url_for('academic.dashboard') }}" class="btn btn-secondary mt-3 ms-2">Akademisyen Paneline Dön</a>
+</div>
+{% endblock %}
