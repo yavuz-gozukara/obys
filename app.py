@@ -65,39 +65,4 @@ app = create_app()
 # Uygulama route haritası: Tüm endpointlerin listesini gösterir (debug için).
 # print(app.url_map)  # GEREKSİZ, kaldırıldı.
 
-if __name__ == '__main__':
-    # Uygulama başlatılırken veritabanı ve akademisyen kayıtlarını başlatır.
-    from werkzeug.security import generate_password_hash
-    from models import User, Akademisyen
-    with app.app_context():
-        init_db(app)
-        # Akademisyen kaydını txt dosyasından ekler.
-        akademisyen_txt = 'akademisyen_kayit.txt'
-        if os.path.exists(akademisyen_txt):
-            with open(akademisyen_txt, 'r', encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith('#'):
-                        continue
-                    parts = line.split(',')
-                    if len(parts) < 4:
-                        continue
-                    ad, soyad, email, sifre = [p.strip() for p in parts[:4]]
-                    # Akademisyen zaten var mı kontrolü
-                    existing_user = User.query.filter_by(Email=email, UserType='academician').first()
-                    if not existing_user:
-                        new_user = User(
-                            Isim=ad,
-                            Soyisim=soyad,
-                            Email=email,
-                            SifreHash=generate_password_hash(sifre),
-                            UserType='academician',
-                            is_active_user=True
-                        )
-                        db.session.add(new_user)
-                        db.session.flush()
-                        new_akademisyen = Akademisyen(UserID=new_user.id)
-                        db.session.add(new_akademisyen)
-                        db.session.commit()
-    # Uygulamayı başlatır.
-    socketio.run(app, debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), use_reloader=False, allow_unsafe_werkzeug=True)
+
