@@ -10,14 +10,7 @@
                 <h2 class="text-center mb-4">QR Kod Okut</h2>
                 <p class="text-center text-muted">Lütfen size verilen QR kod verisini aşağıdaki alana girin veya kameranızla okutun.</p>
 
-                <form method="POST" action="{{ url_for('student.qr_scan') }}"> {# Form action qr_scan olarak değiştirildi #}
-                    <div class="mb-3">
-                        <label for="qr_data" class="form-label">QR Kod Verisi</label>
-                        <input type="text" class="form-control" id="qr_data" name="qr_data" required placeholder="QR kodundan gelen veriyi buraya yapıştırın">
-                        <div class="form-text">Örnek: Y291cnNlOjE7c2Vzc2lvbjoxO3RpbWU6MTcwNTQ4NzY2Ny4xMjM=</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Yoklamayı Kaydet</button>
-                </form>
+                <!-- Elle veri girme kaldırıldı, sadece kamera ile okutma aktif -->
 
                 <hr class="my-4">
                 <p class="text-center">Veya kameranız ile okutmak için:</p>
@@ -37,11 +30,24 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 <script>
     function onScanSuccess(decodedText, decodedResult) {
-        // Handle on success condition with the decoded text and result.
+        // QR kod okunduğunda otomatik olarak POST isteği gönder
         console.log(`Code matched = ${decodedText}`, decodedResult);
-        document.getElementById('qr_data').value = decodedText;
-        document.querySelector('form').submit(); // Automatically submit the form
         html5QrcodeScanner.clear(); // Stop the scanner
+        fetch("{{ url_for('student.qr_scan') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `qr_data=${encodeURIComponent(decodedText)}`
+        }).then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                response.text().then(text => {
+                    document.getElementById('qr-reader-results').innerHTML = text;
+                });
+            }
+        });
     }
 
     function onScanError(errorMessage) {
@@ -50,7 +56,14 @@
     }
 
     var html5QrcodeScanner = new Html5QrcodeScanner(
-        "qr-reader", { fps: 10, qrbox: 250 });
+        "qr-reader", {
+            fps: 10,
+            qrbox: 250,
+            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+            videoConstraints: {
+                facingMode: { exact: "environment" }
+            }
+        });
     html5QrcodeScanner.render(onScanSuccess, onScanError);
 
     // Oturum ID'sini backend'den alın (ör: bir değişken olarak gönderin)
